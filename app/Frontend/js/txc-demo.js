@@ -16,10 +16,8 @@ var fuel;
 var con,cons,consa = [ ];
 var minspeed = 5;
 var wdgClk, wdgVsp, wdgEsp, wdgTrq;
-//var wdgVspeed, wdgEspeed;
 var wdgView1, wdgHea, wdgCar;
 var wdgFue, wdgGpred, wdgGpblack;
-var wdgOdo, wdgFsr, wdgCon, wdgConX;
 var conscale = 40;
 var condt = 60000;
 
@@ -165,7 +163,6 @@ function clearGauges() {
 				break;
 			case "speed":
 				gauges[g].setValue(0);
-				gauges[g].setOdoValue(0);
 				break;
 			default:
 				gauges[g].setValue(0);
@@ -205,24 +202,6 @@ function gotFuelLevel(obj) {
 	}
 }
 
-function displayConsumation(c) {
-	var i, n;
-	n = consa.push(c) - 9;
-	while (n > 0) {
-		consa.shift();
-		n--;
-	}
-	for (i = 0 ; i < 9 ; i++) {
-		if (i + n < 0) {
-			wdgConX[i].style.height = "0%";
-			wdgConX[i].innerHTML = "";
-		} else {
-			wdgConX[i].style.height = (100*Math.min(1,consa[i+n]/conscale))+"%";
-			wdgConX[i].innerHTML = "<p>"+consa[i+n]+"</p>";
-		}
-	}
-}
-
 function gotStart(obj) {
 	document.body.className = "started";
 	vspeed = 0;
@@ -231,7 +210,6 @@ function gotStart(obj) {
 	cons = undefined;
 	consa = [ ];
 
-	wdgFsr.innerHTML = wdgOdo.innerHTML = wdgCon.innerHTML = 
 	wdgVsp.innerHTML = /*wdgVspeed.innerHTML = */
 	wdgEsp.innerHTML = /*wdgEspeed.innerHTML = */
 	wdgHea.innerHTML = wdgFue.innerHTML = "?";
@@ -243,7 +221,6 @@ function gotStart(obj) {
 
 function gotStop(obj) {
 	document.body.className = "connected";
-	setMapsLockState(false);
 }
 
 var msgcnt=0;
@@ -294,7 +271,6 @@ function gotStat(obj) {
 
 function onAbort() {
 	document.body.className = "not-connected";
-	setMapsLockState(false);
 }
 
 function onOpen() {
@@ -334,7 +310,6 @@ function send(message) {
 
 function doConnect() {
 	document.body.className = "connecting";
-	setMapsLockState(false);
 	ws = new afb.ws(onOpen, onAbort);
 }
 
@@ -347,35 +322,13 @@ function doStop() {
 }
 
 $(function() {
-	wdgClk = document.getElementById("clk");
 	wdgVsp = document.getElementById("vsp");
-	//wdgVspeed = document.getElementById("vspeed");
 	wdgEsp = document.getElementById("esp");
-	//wdgEspeed = document.getElementById("espeed");
 	wdgTrq = document.getElementById("trq");
-	wdgView1 = document.getElementById("view1");
-	wdgHea = document.getElementById("hea");
-	wdgCar = document.getElementById("car");
 	wdgFue = document.getElementById("fue");
-	wdgGpred = document.getElementById("gpred");
-	wdgGpblack = document.getElementById("gpblack");
-	wdgFsr = document.getElementById("fsr");
 	wdgStat = document.getElementById("stat");
 	wdgMsg = document.getElementById("msg");
-	wdgCon = document.getElementById("con");
-	wdgConX = [
-			document.getElementById("con1"),
-			document.getElementById("con2"),
-			document.getElementById("con3"),
-			document.getElementById("con4"),
-			document.getElementById("con5"),
-			document.getElementById("con6"),
-			document.getElementById("con7"),
-			document.getElementById("con8"),
-			document.getElementById("con9")
-		];
 
-	initMaps();
 	initGauges();
 
 	doConnect();
