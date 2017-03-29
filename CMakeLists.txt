@@ -17,7 +17,7 @@
 # limitations under the License.
 ###########################################################################
 
-project(txc-demo)
+project(low-can-demo)
 
 cmake_minimum_required(VERSION 3.3)
 
@@ -55,18 +55,6 @@ add_compile_options(${EXTRAS_CFLAGS})
 include_directories(${EXTRAS_INCLUDE_DIRS})
 link_libraries(${EXTRAS_LIBRARIES})
 
-###########################################################################
-# the binding for afb
-
-message(STATUS "Creation of ${PROJECT_NAME} for AFB-DAEMON")
-
-###############################################################
-add_library(txc-binding MODULE binding/txc-binding.c)
-set_target_properties(txc-binding PROPERTIES
-	PREFIX ""
-	LINK_FLAGS "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/binding/export.map"
-)
-
 ###############################################################
 add_library(stat-binding MODULE binding/stat-binding.c)
 set_target_properties(stat-binding PROPERTIES
@@ -80,26 +68,24 @@ file(GLOB_RECURSE HTML5FILES app/*)
 
 add_custom_command(
 	OUTPUT ${PROJECT_NAME}.wgt
-	DEPENDS txc-binding stat-binding config.xml.in ${HTML5FILES} bower.json gulpfile.js package.json
+	DEPENDS stat-binding config.xml.in ${HTML5FILES} bower.json gulpfile.js package.json
 	COMMAND rm -rf package
 	COMMAND mkdir -p package/${PROJECT_LIBDIR}
 	COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && gulp widget-config-prod && cp -a dist.prod ${CMAKE_CURRENT_BINARY_DIR}/package/htdocs
 	COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_ICON} package/icon.png
 	COMMAND mv package/htdocs/config.xml package/
-	COMMAND cp -a ${CMAKE_CURRENT_SOURCE_DIR}/data package/
 	COMMAND cp *.so package/${PROJECT_LIBDIR}
 	COMMAND wgtpkg-pack -f -o ${PROJECT_NAME}.wgt package 
 )
 
 add_custom_command(
 	OUTPUT ${PROJECT_NAME}-devel.wgt
-	DEPENDS txc-binding stat-binding config.xml.in ${HTML5FILES} bower.json gulpfile.js package.json
+	DEPENDS stat-binding config.xml.in ${HTML5FILES} bower.json gulpfile.js package.json
 	COMMAND rm -rf package
 	COMMAND mkdir -p package/${PROJECT_LIBDIR}
 	COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && gulp widget-config-dev && cp -a dist.dev ${CMAKE_CURRENT_BINARY_DIR}/package/htdocs
 	COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_ICON} package/icon.png
 	COMMAND mv package/htdocs/config.xml package/
-	COMMAND cp -a ${CMAKE_CURRENT_SOURCE_DIR}/data package/
 	COMMAND cp *.so package/${PROJECT_LIBDIR}
 	COMMAND wgtpkg-pack -f -o ${PROJECT_NAME}-devel.wgt package 
 )

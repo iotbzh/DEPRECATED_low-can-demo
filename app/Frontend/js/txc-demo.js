@@ -8,194 +8,20 @@ location.search.substr(1).split("&").forEach(function(item) {
 
 var afb = new AFB("api"/*root*/, urlParams.token[0]);
 var ws;
-var curLat,prvLat;
-var curLon,prvLon;
 var vspeed = 0, espeed = 0, torque = 0;
 var heading = 0;
 var R2D = 180.0 / Math.PI;
 var D2R = Math.PI / 180.0;
-var gapikey = "AIzaSyBG_RlEJr2i7zqJVQijKh4jQrE-DkeHau0";
-var src1 = "http://maps.googleapis.com/maps/api/streetview?key="+gapikey+"&size=480x320";
 var fuel;
-var odoini,odo,odoprv;
-var fsrini,fsr,fsrprv;
 var con,cons,consa = [ ];
 var minspeed = 5;
-var wdgClk, wdgLat, wdgLon, wdgVsp, wdgEsp, wdgTrq;
+var wdgClk, wdgVsp, wdgEsp, wdgTrq;
 //var wdgVspeed, wdgEspeed;
 var wdgView1, wdgHea, wdgCar;
 var wdgFue, wdgGpred, wdgGpblack;
 var wdgOdo, wdgFsr, wdgCon, wdgConX;
 var conscale = 40;
 var condt = 60000;
-
-// leaflet maps
-var layers={
-	googleStreets: L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-		minZoom: 1,
-		maxZoom: 20,
-		subdomains:['mt0','mt1','mt2','mt3']
-	}),
-	googleHybrid: L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
-		minZoom: 1,
-		maxZoom: 20,
-		subdomains:['mt0','mt1','mt2','mt3']
-	}),
-	googleSat: L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-		minZoom: 1,
-		maxZoom: 20,
-		subdomains:['mt0','mt1','mt2','mt3']
-	}),
-	googleTerrain: L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
-		minZoom: 1,
-		maxZoom: 20,
-		subdomains:['mt0','mt1','mt2','mt3']
-	}),
-	openStreetMap: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		minZoom: 1,
-		maxZoom: 19,
-		attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
-	})
-};
-
-var defaultLocation=[47.6243678,-2.7789165];
-L.Icon.Default.imagePath="/images";
-var maps={
-	mapstreet: {
-		map: null,
-		options: {
-			center: defaultLocation,
-			layers: layers.openStreetMap,
-			zoom: 15,
-			attributionControl: false,
-		},
-		layersControl: {
-			"OpenStreetMap": layers.openStreetMap,
-			"Google Streets": layers.googleStreets,
-			"Google Satellite": layers.googleSat,
-			"Google Terrain": layers.googleTerrain,
-		},
-		path: {
-			stroke: true,
-			color: "blue",
-			weight: "6",
-			opacity: "0.9",
-			lineCap: "round",
-			lineJoin: "round",
-			smoothFactor: 0.5,
-		}
-	},
-	mapsat: {
-		map: null,
-		options: {
-			center: defaultLocation,
-			layers: layers.googleHybrid,
-			zoom: 17,
-			attributionControl: false,
-		},
-		events: {
-			load: adjustCar,
-			viewreset: adjustCar,
-			zoomend: adjustCar,
-			move: adjustCar,
-			resize: adjustCar,
-		}
-	}
-};
-var mapslocked=null;
-
-function initMaps() {
-	for (var id in maps) {
-		var mh=maps[id];
-		mh.map=L.map(id,mh.options);
-		if (mh.events) {
-			for (var evt in mh.events) {
-				mh.map.on(evt,mh.events[evt]);
-	
-			}
-		}
-		if (mh.layersControl) {
-			L.control.layers(mh.layersControl).addTo(mh.map);
-		}
-		if (mh.path) {
-			mh.path=L.polyline([],mh.path); 
-			// TODO: use multicolor lines: https://github.com/hgoebl/Leaflet.MultiOptionsPolyline
-			mh.path.addTo(mh.map);
-		}
-	}
-	adjustCar(); // initial call
-	setMapsLockState(false);
-
-	wdgView1.src = src1+"&location="+defaultLocation[0]+","+defaultLocation[1]+"&heading=210";
-}
-
-function setMapsLockState(b) {
-	// do nothing if already in good state
-	if (mapslocked === b) return;
-	mapslocked=b;
-
-	// maps shouldn't be draggable while trace is active
-	for (var id in maps) {
-		if (b) {
-			maps[id].map.dragging.disable();
-			if (maps[id].path) {
-				maps[id].path.setLatLngs([]);
-			}
-		}
-		else
-			maps[id].map.dragging.enable();
-	}
-	
-	// car visible or not
-	if (b) {
-		// lock state: car visible
-		$(wdgCar).removeClass("invisible");
-	}
-	else {
-		$(wdgCar).addClass("invisible");
-	}
-
-	// clear all gauges
-	clearGauges();
-}
-
-function adjustCar() {
-	/* get zoom level on map and adjust scaling ! */
-	/* 
-	  zoom => scale
-	   19 => 1.0 
-	   15 => 0.5 
-	*/
-	var zl=maps.mapsat.map.getZoom();
-	var scale=0.125*zl-1.375;
-	if (scale<0.5) scale=0.5;
-	var trans="scale("+scale+") translate(-50%,-68%) rotate("+heading+"deg)";
-	$(wdgCar).css("transform",trans);
-	//console.log("zoom:"+zl+" heading:"+heading+" scale:"+scale);
-}
-
-function updatePosition() {
-	if (curLat !== undefined && curLon !== undefined) {
-		if (prvLat !== undefined && prvLon !== undefined && vspeed >= minspeed) {
-			heading = Math.round(R2D * Math.atan2((curLon - prvLon)*Math.cos(D2R*curLat), curLat - prvLat));
-			wdgHea.innerHTML = String(heading);
-		}
-
-		wdgView1.src = src1+"&location="+curLat+","+curLon+"&heading="+heading;
-
-		for (var id in maps) {
-			var mh=maps[id];
-			mh.map.panTo([curLat,curLon],{
-				animate:true,
-				duration: 1.0,
-				easeLinearity: 1
-			});
-			if (mh.path) {
-				mh.path.addLatLng([curLat,curLon]);
-			}
-		}
-	}
-} 
 
 /* gauges creation */
 var gauges={};
@@ -348,27 +174,6 @@ function clearGauges() {
 	}
 }
 
-/* only update position when 2 coords have been received, whatever the order */
-var coordUpdated=false;
-
-function gotLatitude(obj) {
-	prvLat = curLat;
-	curLat = obj.data.value;
-	wdgLat.innerHTML = String(curLat);
-	if (coordUpdated)
-		updatePosition();
-	coordUpdated=!coordUpdated;
-}
-
-function gotLongitude(obj) {
-	prvLon = curLon;
-	curLon = obj.data.value;
-	wdgLon.innerHTML = String(curLon);
-	if (coordUpdated)
-		updatePosition();
-	coordUpdated=!coordUpdated;
-}
-
 function gotVehicleSpeed(obj) {
 	vspeed = Math.round(obj.data.value);
 	wdgVsp.innerHTML = /* wdgVspeed.innerHTML = */ String(vspeed);
@@ -418,65 +223,15 @@ function displayConsumation(c) {
 	}
 }
 
-function updateConsumation() {
-	if (odoprv === undefined) {
-		odoprv = odo;
-		cons = undefined;
-	}
-	if (fsrprv === undefined || fsrprv > fsr) {
-		fsrprv = fsr;
-		cons = undefined;
-	}
-	if ((odo - odoprv) > 0.075 && fsr != fsrprv) {
-		con = Math.round(1000 * (fsr - fsrprv) / (odo - odoprv)) / 10;
-		wdgCon.innerHTML = con;
-		//gauges.fuel.setValueAnimated(con);
-		gauges.fuel.setValue(con);
-		var t = Date.now();
-		if (cons === undefined) {
-			cons = { t: t, f: fsrprv, o: odoprv };
-		} else if (t - cons.t >= condt) {
-			displayConsumation(Math.round(1000 * (fsr - cons.f) / (odo - cons.o)) / 10);
-			cons = { t: t, f: fsr, o: odo };
-		}
-		odoprv = odo;
-		fsrprv = fsr;
-	}
-}
-
-function gotOdometer(obj) {
-	odo = obj.data.value;
-	wdgOdo.innerHTML = Math.round(odo * 1000) / 1000;
-	updateConsumation();
-	gauges.speed.setOdoValue(odo);
-}
-
-function gotFuelSince(obj) {
-	fsr = obj.data.value;
-	wdgFsr.innerHTML = Math.round(fsr * 1000) / 1000;
-	updateConsumation();
-}
-
 function gotStart(obj) {
 	document.body.className = "started";
-	curLat = undefined;
-	prvLat = undefined;
-	curLon = undefined;
-	prvLon = undefined;
 	vspeed = 0;
 	espeed = 0;
 	heading = 0;
-	odoini = undefined;
-	odo = undefined;
-	odoprv = undefined;
-	fsrini = undefined;
-	fsr = undefined;
-	fsrprv = undefined;
 	cons = undefined;
 	consa = [ ];
 
 	wdgFsr.innerHTML = wdgOdo.innerHTML = wdgCon.innerHTML = 
-	wdgClk.innerHTML = wdgLat.innerHTML = wdgLon.innerHTML =
 	wdgVsp.innerHTML = /*wdgVspeed.innerHTML = */
 	wdgEsp.innerHTML = /*wdgEspeed.innerHTML = */
 	wdgHea.innerHTML = wdgFue.innerHTML = "?";
@@ -484,7 +239,6 @@ function gotStart(obj) {
 		wdgConX[i].style.height = "0%";
 		wdgConX[i].innerHTML = "";
 	}
-	setMapsLockState(true);
 }
 
 function gotStop(obj) {
@@ -496,9 +250,8 @@ var msgcnt=0;
 var msgprv=0;
 var msgprvts=0;
 function gotAny(obj) { 
-	if (obj.event != "txc/STOP") {
+	if (obj.event != "low-can/STOP") {
 		document.body.className = "started";
-		setMapsLockState(true);
 	}
 	msgcnt++;
 	updateClock(obj.data.timestamp);
@@ -545,15 +298,11 @@ function onAbort() {
 }
 
 function onOpen() {
-	ws.call("txc/subscribe", {event:[
-			"engine_speed",
-			"fuel_level",
-			"fuel_consumed_since_restart",
-			"longitude",
-			"latitude",
-			"odometer",
-			"vehicle_speed",
-			"torque_at_transmission",
+	ws.call("low-can/subscribe", {event:[
+			"engine.speed",
+			"fuel.level",
+			"vehicle.speed",
+			"engine.torque",
 			"START",
 			"STOP"]}, onSubscribed, onAbort);
 	ws.call("stat/subscribe", true);
@@ -563,17 +312,13 @@ function onOpen() {
 function onSubscribed() {
 	document.body.className = "connected";
 	setMapsLockState(false);
-	ws.onevent("txc/engine_speed", gotEngineSpeed);
-	ws.onevent("txc/fuel_level", gotFuelLevel);
-	ws.onevent("txc/fuel_consumed_since_restart", gotFuelSince);
-	ws.onevent("txc/longitude", gotLongitude);
-	ws.onevent("txc/latitude", gotLatitude);
-	ws.onevent("txc/odometer", gotOdometer);
-	ws.onevent("txc/vehicle_speed", gotVehicleSpeed);
-	ws.onevent("txc/torque_at_transmission", gotTorque);
-	ws.onevent("txc/START", gotStart);
-	ws.onevent("txc/STOP", gotStop);
-	ws.onevent("txc",gotAny);
+	ws.onevent("low-can/engine.speed", gotEngineSpeed);
+	ws.onevent("low-can/fuel.level", gotFuelLevel);
+	ws.onevent("low-can/vehicle.speed", gotVehicleSpeed);
+	ws.onevent("low-can/engine.torque", gotTorque);
+	ws.onevent("low-can/START", gotStart);
+	ws.onevent("low-can/STOP", gotStop);
+	ws.onevent("low-can",gotAny);
 }
 
 function replyok(obj) {
@@ -595,17 +340,15 @@ function doConnect() {
 }
 
 function doStart(fname) {
-	ws.call('txc/start',{filename: fname});
+	ws.call('low-can/start',{filename: fname});
 }
 
 function doStop() {
-	ws.call('txc/stop',true);
+	ws.call('low-can/stop',true);
 }
 
 $(function() {
 	wdgClk = document.getElementById("clk");
-	wdgLat = document.getElementById("lat");
-	wdgLon = document.getElementById("lon");
 	wdgVsp = document.getElementById("vsp");
 	//wdgVspeed = document.getElementById("vspeed");
 	wdgEsp = document.getElementById("esp");
@@ -617,7 +360,6 @@ $(function() {
 	wdgFue = document.getElementById("fue");
 	wdgGpred = document.getElementById("gpred");
 	wdgGpblack = document.getElementById("gpblack");
-	wdgOdo = document.getElementById("odo");
 	wdgFsr = document.getElementById("fsr");
 	wdgStat = document.getElementById("stat");
 	wdgMsg = document.getElementById("msg");
