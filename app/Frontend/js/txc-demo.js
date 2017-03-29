@@ -278,9 +278,8 @@ function onOpen() {
 			"diagnostic_messages.engine.speed",
 			"diagnostic_messages.fuel.level",
 			"diagnostic_messages.vehicle.speed",
-			"diagnostic_messages.engine.torque",
-			"START",
-			"STOP"]}, onSubscribed, onAbort);
+			"diagnostic_messages.engine.torque"]},
+			onSubscribed, onAbort);
 	ws.call("stat/subscribe", true);
 	ws.onevent("stat/stat", gotStat);
 }
@@ -313,12 +312,9 @@ function doConnect() {
 	ws = new afb.ws(onOpen, onAbort);
 }
 
-function doStart(fname) {
-	ws.call('low-can/start',{filename: fname});
-}
-
-function doStop() {
-	ws.call('low-can/stop',true);
+function doDisconnect() {
+	document.body.className = "disconnecting";
+	ws = new afb.ws(onOpen, onAbort);
 }
 
 $(function() {
