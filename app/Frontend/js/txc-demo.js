@@ -299,10 +299,10 @@ function onAbort() {
 
 function onOpen() {
 	ws.call("low-can/subscribe", {event:[
-			"engine.speed",
-			"fuel.level",
-			"vehicle.speed",
-			"engine.torque",
+			"diagnostic_messages.engine.speed",
+			"diagnostic_messages.fuel.level",
+			"diagnostic_messages.vehicle.speed",
+			"diagnostic_messages.engine.torque",
 			"START",
 			"STOP"]}, onSubscribed, onAbort);
 	ws.call("stat/subscribe", true);
@@ -311,11 +311,10 @@ function onOpen() {
 
 function onSubscribed() {
 	document.body.className = "connected";
-	setMapsLockState(false);
-	ws.onevent("low-can/engine.speed", gotEngineSpeed);
-	ws.onevent("low-can/fuel.level", gotFuelLevel);
-	ws.onevent("low-can/vehicle.speed", gotVehicleSpeed);
-	ws.onevent("low-can/engine.torque", gotTorque);
+	ws.onevent("low-can/diagnostic_messages.engine.speed", gotEngineSpeed);
+	ws.onevent("low-can/diagnostic_messages.fuel.level", gotFuelLevel);
+	ws.onevent("low-can/diagnostic_messages.vehicle.speed", gotVehicleSpeed);
+	ws.onevent("low-can/diagnostic_messages.engine.torque", gotTorque);
 	ws.onevent("low-can/START", gotStart);
 	ws.onevent("low-can/STOP", gotStop);
 	ws.onevent("low-can",gotAny);
