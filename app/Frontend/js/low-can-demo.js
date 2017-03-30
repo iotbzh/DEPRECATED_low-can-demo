@@ -9,7 +9,6 @@ location.search.substr(1).split("&").forEach(function(item) {
 var afb = new AFB("api"/*root*/, urlParams.token[0]);
 var ws;
 var vspeed = 0, espeed = 0, torque = 0;
-var heading = 0;
 var R2D = 180.0 / Math.PI;
 var D2R = Math.PI / 180.0;
 var fuel;
@@ -284,14 +283,32 @@ function onOpen() {
 	ws.onevent("stat/stat", gotStat);
 }
 
+function onClose() {
+	ws.call("low-can/unsubscribe", {event:[
+			"diagnostic_messages.engine.speed",
+			"diagnostic_messages.fuel.level",
+			"diagnostic_messages.vehicle.speed",
+			"diagnostic_messages.engine.torque"]},
+			onUnsubscribed, onAbort);
+	ws.call("stat/subscribe", true);
+	ws.onevent("stat/stat", gotStat);
+}
+
 function onSubscribed() {
 	document.body.className = "connected";
 	ws.onevent("low-can/diagnostic_messages.engine.speed", gotEngineSpeed);
 	ws.onevent("low-can/diagnostic_messages.fuel.level", gotFuelLevel);
 	ws.onevent("low-can/diagnostic_messages.vehicle.speed", gotVehicleSpeed);
 	ws.onevent("low-can/diagnostic_messages.engine.torque", gotTorque);
-	ws.onevent("low-can/START", gotStart);
-	ws.onevent("low-can/STOP", gotStop);
+	ws.onevent("low-can",gotAny);
+}
+
+function onUnsubscribed() {
+	document.body.className = "disconnected";
+	ws.onevent("low-can/diagnostic_messages.engine.speed", gotEngineSpeed);
+	ws.onevent("low-can/diagnostic_messages.fuel.level", gotFuelLevel);
+	ws.onevent("low-can/diagnostic_messages.vehicle.speed", gotVehicleSpeed);
+	ws.onevent("low-can/diagnostic_messages.engine.torque", gotTorque);
 	ws.onevent("low-can",gotAny);
 }
 
@@ -314,7 +331,7 @@ function doConnect() {
 
 function doDisconnect() {
 	document.body.className = "disconnecting";
-	ws = new afb.ws(onOpen, onAbort);
+	ws = new afb.ws(onClose, onAbort);
 }
 
 $(function() {
