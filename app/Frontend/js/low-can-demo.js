@@ -330,7 +330,7 @@ function doConnect() {
 }
 
 function doDisconnect() {
-	document.body.className = "disconnecting";
+	document.body.className = "connecting";
 	ws = new afb.ws(onClose, onAbort);
 }
 
