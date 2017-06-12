@@ -2,7 +2,6 @@
 # Copyright 2015, 2016, 2017 IoT.bzh
 #
 # author: Fulup Ar Foll <fulup@iot.bzh>
-# contrib: Romain Forlot <romain.forlot@iot.bzh>w
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,17 +16,37 @@
 # limitations under the License.
 ###########################################################################
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/conf.d/config.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/conf.d/app-templates/cmake/common.cmake)
+Name:    low-can-demo
+Version: 0.9
+Release: 1
+License: APL2.0
+Summary: HTML5 Low level CAN service UI for demo
+Url:     https://gerrit.automotivelinux.org/gerrit/apps/app-templates
+Source0: %{name}_%{version}.orig.tar.gz
 
-# Bindings to compile
-# --------------------
-project_subdirs_add()
+Prefix: /opt/low-can-demo
+BuildRequires: cmake
+BuildRequires: gcc gcc-c++
+BuildRequires: 
 
-project_targets_populate()
-project_package_build()
+BuildRoot:%{_tmppath}/%{name}-%{version}-build
 
-project_closing_msg()
+%description
+HTML5 Low level CAN service UI for demo
 
+%prep
+%setup -q
+
+%build
+%cmake -DBINDINGS_INSTALL_PREFIX:PATH=%{_libdir}
+%__make %{?_smp_mflags}
+
+%install
+[ -d build ] && cd build
+%make_install
+
+%files
+%defattr(-,root,root)
+%dir %{_prefix}/*
+%{_prefix}/*/*

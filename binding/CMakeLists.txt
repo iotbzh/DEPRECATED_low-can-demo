@@ -2,7 +2,7 @@
 # Copyright 2015, 2016, 2017 IoT.bzh
 #
 # author: Fulup Ar Foll <fulup@iot.bzh>
-# contrib: Romain Forlot <romain.forlot@iot.bzh>w
+# contrib: Romain Forlot <romain.forlot@iot.bzh>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,17 +17,24 @@
 # limitations under the License.
 ###########################################################################
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
+# Add target to project dependency list
+PROJECT_TARGET_ADD(stat)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/conf.d/config.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/conf.d/app-templates/cmake/common.cmake)
+	# Define project Targets
+	add_library(${TARGET_NAME} MODULE ${TARGET_NAME}.c)
 
-# Bindings to compile
-# --------------------
-project_subdirs_add()
+	# Binder exposes a unique public entry point
+	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES
+		PREFIX "afb-"
+		LABELS "BINDING"
+		LINK_FLAGS ${BINDINGS_LINK_FLAG}
+		OUTPUT_NAME ${TARGET_NAME}
+	)
 
-project_targets_populate()
-project_package_build()
+	# Library dependencies (include updates automatically)
+	TARGET_LINK_LIBRARIES(${TARGET_NAME}
+		${link_libraries})
 
-project_closing_msg()
-
+	# installation directory
+	INSTALL(TARGETS ${TARGET_NAME}
+		LIBRARY DESTINATION ${BINDINGS_INSTALL_DIR})

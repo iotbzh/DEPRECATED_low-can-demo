@@ -17,17 +17,27 @@
 # limitations under the License.
 ###########################################################################
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
+# Add target to project dependency list
+PROJECT_TARGET_ADD(low-can-demo)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/conf.d/config.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/conf.d/app-templates/cmake/common.cmake)
+	# Define project Targets
+	add_custom_command(OUTPUT dist.prod
+	DEPENDS ${TARGET_NAME}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	COMMAND [ -d "dist.prod" ] || npm install
+	COMMAND [ -d "dist.prod" ] || gulp build-app-prod
+	COMMAND touch dist.prod
+	COMMAND cp -r dist.prod ${CMAKE_CURRENT_BINARY_DIR})
 
-# Bindings to compile
-# --------------------
+	add_custom_target(${TARGET_NAME} ALL DEPENDS dist.prod)
+
+	# Binder exposes a unique public entry point
+	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES
+		LABELS "HTDOCS"
+		OUTPUT_NAME dist.prod)
+
+	# installation directory
+	INSTALL(DIRECTORY dist.prod/ DESTINATION ${BINDINGS_INSTALL_DIR})
+
+# Add subdir targets
 project_subdirs_add()
-
-project_targets_populate()
-project_package_build()
-
-project_closing_msg()
-
