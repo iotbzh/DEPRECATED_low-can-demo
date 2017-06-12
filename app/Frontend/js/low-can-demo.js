@@ -14,8 +14,8 @@ var D2R = Math.PI / 180.0;
 var fuel;
 var con,cons,consa = [ ];
 var minspeed = 5;
-var wdgClk, wdgVsp, wdgEsp, wdgTrq;
-var wdgView1, wdgHea, wdgCar;
+var temp = 18;
+var wdgTem, wdgVsp, wdgEsp, wdgTrq;
 var wdgFue, wdgGpred, wdgGpblack;
 var conscale = 40;
 var condt = 60000;
@@ -38,7 +38,7 @@ function initGauges() {
 		thresholdVisible: false,
 		ledVisible: false,
 		pointerType: steelseries.PointerType.TYPE11,
-		useOdometer: true,
+		useOdometer: false,
 		odometerParams: {
 			digits: 6
 		}
@@ -53,66 +53,74 @@ function initGauges() {
 		unitString: "x1000",
 		lcdVisible: false,
 		niceScale: true,
-		maxValue: 8,
+		maxValue: 5,
 		maxMeasuredValue: 0,
 		maxMeasuredValueVisible: false,
 		section: [
-			steelseries.Section(6, 8, 'rgba(255, 0, 0, 0.7)')
+			steelseries.Section(4, 8, 'rgba(255, 0, 0, 0.7)')
 		],
 		area: [
-			steelseries.Section(6, 8, 'rgba(255, 0, 0, 0.3)')
+			steelseries.Section(5, 8, 'rgba(255, 0, 0, 0.3)')
 		],
 		thresholdVisible: false,
 		ledVisible: false,
 		pointerType: steelseries.PointerType.TYPE11
 	});
 
-	gauges.fuel = new steelseries.RadialBargraph('fuelGauge', {
+	gauges.maf = new steelseries.Radial('MAFGauge', {
 		gaugeType: steelseries.GaugeType.TYPE4,
 		frameDesign: steelseries.FrameDesign.BLACK_METAL,
 		backgroundColor: steelseries.BackgroundColor.CARBON,
 		size: 200,
-		titleString: "Fuel Rate",
-		unitString: "L/100 Km",
+		titleString: "Air flow Rate",
+		unitString: "grams/sec",
 		lcdVisible: true,
 		lcdColor: steelseries.LcdColor.STANDARD,
 		lcdDecimals: 1,
 		niceScale: true,
 		minValue: 0,
-		maxValue: conscale,
+		maxValue: 655,
 		minMeasuredValue: 0,
 		maxMeasuredValue: conscale,
 		maxMeasuredValueVisible: true,
-/*		section: [
-			steelseries.Section(0, 8, 'rgba(0, 255, 0, 0.5)'),
-			steelseries.Section(8, 16, 'rgba(255, 255, 0, 0.5)'),
-			steelseries.Section(16, 26, 'rgba(255, 128, 0, 0.5)'),
-			steelseries.Section(26, conscale, 'rgba(255, 0, 0, 0.5)')
+		section: [
+			steelseries.Section(0, 255, 'rgba(0, 255, 0, 0.5)'),
+			steelseries.Section(256, 326, 'rgba(255, 255, 0, 0.5)'),
+			steelseries.Section(327, 600, 'rgba(255, 128, 0, 0.5)'),
+			steelseries.Section(601, 655, 'rgba(255, 0, 0, 0.5)')
 		],
-*/
-		valueGradient: new steelseries.gradientWrapper(
-			0,
-			conscale,
-			[ 0, 8/conscale, 16/conscale, 26/conscale, 1],
-			[ 
-				new steelseries.rgbaColor(0, 255, 0, 1),
-				new steelseries.rgbaColor(255, 255, 0, 1),
-				new steelseries.rgbaColor(255, 128, 0, 1),
-				new steelseries.rgbaColor(255, 0, 0, 1),
-				new steelseries.rgbaColor(255, 0, 0, 1)
-			]
-		),
 		useValueGradient: true,
 		thresholdVisible: false,
 		ledVisible: false,
 		pointerType: steelseries.PointerType.TYPE11
 	});
 
-	gauges.clock = new steelseries.DisplaySingle('clockGauge', {
-		width: 170,
-		height: 50,
-		valuesNumeric: false,
-		value: "",
+	gauges.iatemp = new steelseries.Radial('IATempGauge', {
+		gaugeType: steelseries.GaugeType.TYPE4,
+		frameDesign: steelseries.FrameDesign.BLACK_METAL,
+		backgroundColor: steelseries.BackgroundColor.CARBON,
+		size: 200,
+		titleString: "Intake air temp",
+		unitString: "°C",
+		lcdVisible: true,
+		lcdColor: steelseries.LcdColor.STANDARD,
+		lcdDecimals: 1,
+		niceScale: true,
+		minValue: 0,
+		maxValue: 100,
+		minMeasuredValue: 0,
+		maxMeasuredValue: 100,
+		maxMeasuredValueVisible: true,
+		section: [
+			steelseries.Section(0, 30, 'rgba(0, 255, 0, 0.5)'),
+			steelseries.Section(31, 50, 'rgba(255, 255, 0, 0.5)'),
+			steelseries.Section(51, 70, 'rgba(255, 128, 0, 0.5)'),
+			steelseries.Section(71, 100, 'rgba(255, 0, 0, 0.5)')
+		],
+		useValueGradient: true,
+		thresholdVisible: false,
+		ledVisible: false,
+		pointerType: steelseries.PointerType.TYPE11
 	});
 	
 	gauges.torque = new steelseries.Radial('torqueGauge', {
@@ -120,21 +128,21 @@ function initGauges() {
 		frameDesign: steelseries.FrameDesign.BLACK_METAL,
 		backgroundColor: steelseries.BackgroundColor.CARBON,
 		size: 200,
-		titleString: "Torque",
-		unitString: "Nm",
+		titleString: "Load",
+		unitString: "%",
 		lcdVisible: false,
 		niceScale: true,
-		minValue: -500,
-		maxValue: 500,
+		minValue: 0,
+		maxValue: 100,
 		maxMeasuredValue: 0,
 		maxMeasuredValueVisible: false,
 		section: [
-			steelseries.Section(-500, 0, 'rgba(0, 255, 0, 0.7)'),
-			steelseries.Section(0, 1500, 'rgba(255, 128, 0, 0.7)')
+			steelseries.Section(0, 0, 'rgba(0, 255, 0, 0.7)'),
+			steelseries.Section(50, 1500, 'rgba(255, 128, 0, 0.7)')
 		],
 		area: [
-			steelseries.Section(-500, 0, 'rgba(0, 255, 0, 0.3)'),
-			steelseries.Section(0, 1500, 'rgba(255, 128, 0, 0.3)')
+			steelseries.Section(0, 0, 'rgba(0, 255, 0, 0.3)'),
+			steelseries.Section(50, 1500, 'rgba(255, 128, 0, 0.3)')
 		],
 		threshold: 0,
 		thresholdVisible: true,
@@ -191,14 +199,15 @@ function gotEngineSpeed(obj) {
 }
 
 function gotFuelLevel(obj) {
-	fuel = Math.round(obj.data.value * 10) / 10;
-	if (fuel <= 2) {
-		wdgGpred.style.visibility = "visible";
-	} else {
-		wdgGpred.style.visibility = "hidden";
-		wdgGpblack.style.height = Math.max(100 - fuel, 0) + "%";
-		wdgFue.innerHTML = fuel;
-	}
+	fuel = Math.round(obj.data.value);
+	wdgFue.innerHTML = fuel;
+	gauges.maf.setValue(fuel);
+}
+
+function gotTemp(obj) {
+	temp = Math.round(obj.data.value);
+	wdgTem.innerHTML = temp;
+	gauges.iatemp.setValue(temp);
 }
 
 function gotStart(obj) {
@@ -211,7 +220,7 @@ function gotStart(obj) {
 
 	wdgVsp.innerHTML = /*wdgVspeed.innerHTML = */
 	wdgEsp.innerHTML = /*wdgEspeed.innerHTML = */
-	wdgHea.innerHTML = wdgFue.innerHTML = "?";
+	wdgTem.innerHTML = wdgFue.innerHTML = "?";
 	for (var i = 0 ; i < 9 ; i++) {
 		wdgConX[i].style.height = "0%";
 		wdgConX[i].innerHTML = "";
@@ -225,12 +234,16 @@ function gotStop(obj) {
 var msgcnt=0;
 var msgprv=0;
 var msgprvts=0;
+
 function gotAny(obj) { 
 	if (obj.event != "low-can/STOP") {
 		document.body.className = "started";
 	}
 	msgcnt++;
-	updateClock(obj.data.timestamp);
+
+	wdgTem.innerHTML = temp;
+	gauges.iatemp.setValue(temp);
+//	updateClock(obj.data.timestamp);
 }
 
 function updateMsgRate() {
@@ -245,25 +258,6 @@ function updateMsgRate() {
 	msgprvts=now;
 }
 
-function updateClock(ts) {
-	var h=Math.floor(ts/3600);
-	ts-=h*3600;
-	var m=Math.floor(ts/60);
-	ts-=m*60;
-	var s=Math.floor(ts);
-	ts-=s;
-
-	var chrono=
-		('0'+h).slice(-2)+":"+
-		('0'+m).slice(-2)+":"+
-		('0'+s).slice(-2)+"."+
-		Math.floor(ts*10)
-	;
-		
-	wdgClk.innerHTML=chrono;
-	gauges.clock.setValue(chrono+" ");
-}
-
 function gotStat(obj) {
 	wdgStat.innerHTML = obj.data;
 }
@@ -274,10 +268,11 @@ function onAbort() {
 
 function onOpen() {
 	ws.call("low-can/subscribe", {event:[
-			"diagnostic_messages.engine.speed",
-			"diagnostic_messages.fuel.level",
 			"diagnostic_messages.vehicle.speed",
-			"diagnostic_messages.engine.torque"]},
+			"diagnostic_messages.mass.airflow",
+			"diagnostic_messages.engine.speed",
+			"diagnostic_messages.engine.load",
+			"diagnostic_messages.intake.air.temperature"]},
 			onSubscribed, onAbort);
 	ws.call("stat/subscribe", true);
 	ws.onevent("stat/stat", gotStat);
@@ -286,29 +281,32 @@ function onOpen() {
 function onClose() {
 	ws.call("low-can/unsubscribe", {event:[
 			"diagnostic_messages.engine.speed",
-			"diagnostic_messages.fuel.level",
+			"diagnostic_messages.mass.airflow",
 			"diagnostic_messages.vehicle.speed",
-			"diagnostic_messages.engine.torque"]},
+			"diagnostic_messages.engine.load",
+			"diagnostic_messages.intake.air.temperature"]},
 			onUnsubscribed, onAbort);
-	ws.call("stat/subscribe", true);
+	ws.call("stat/unsubscribe", true);
 	ws.onevent("stat/stat", gotStat);
 }
 
 function onSubscribed() {
 	document.body.className = "connected";
 	ws.onevent("low-can/diagnostic_messages.engine.speed", gotEngineSpeed);
-	ws.onevent("low-can/diagnostic_messages.fuel.level", gotFuelLevel);
+	ws.onevent("low-can/diagnostic_messages.mass.airflow", gotFuelLevel);
 	ws.onevent("low-can/diagnostic_messages.vehicle.speed", gotVehicleSpeed);
-	ws.onevent("low-can/diagnostic_messages.engine.torque", gotTorque);
+	ws.onevent("low-can/diagnostic_messages.engine.load", gotTorque);
+	ws.onevent("low-can/diagnostic_messages.intake.air.temperature", gotTemp);
 	ws.onevent("low-can",gotAny);
 }
 
 function onUnsubscribed() {
 	document.body.className = "disconnected";
 	ws.onevent("low-can/diagnostic_messages.engine.speed", gotEngineSpeed);
-	ws.onevent("low-can/diagnostic_messages.fuel.level", gotFuelLevel);
+	ws.onevent("low-can/diagnostic_messages.mass.airflow", gotFuelLevel);
 	ws.onevent("low-can/diagnostic_messages.vehicle.speed", gotVehicleSpeed);
-	ws.onevent("low-can/diagnostic_messages.engine.torque", gotTorque);
+	ws.onevent("low-can/diagnostic_messages.engine.load", gotTorque);
+	ws.onevent("low-can/diagnostic_messages.intake.air.temperature", gotTemp);
 	ws.onevent("low-can",gotAny);
 }
 
@@ -339,6 +337,7 @@ $(function() {
 	wdgEsp = document.getElementById("esp");
 	wdgTrq = document.getElementById("trq");
 	wdgFue = document.getElementById("fue");
+	wdgTem = document.getElementById("tem");
 	wdgStat = document.getElementById("stat");
 	wdgMsg = document.getElementById("msg");
 
