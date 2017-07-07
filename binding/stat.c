@@ -31,8 +31,8 @@
 
 #include <systemd/sd-event.h>
 
+#define AFB_BINDING_VERSION 1
 #include <afb/afb-binding.h>
-#include <afb/afb-service-itf.h>
 
 /*
  * the interface to afb-daemon
