@@ -65,10 +65,6 @@ set (PKG_REQUIRED_LIST
 # -----------------------------
 add_compile_options()
 
-# LANG Specific compile flags set for all build types
-set(CMAKE_C_FLAGS "")
-set(CMAKE_CXX_FLAGS "")
-
 # Print a helper message when every thing is finished
 # ----------------------------------------------------
 #set(CLOSING_MESSAGE "")
@@ -137,3 +133,8 @@ set(WIDGET_ENTRY_POINT index.html)
 #------------------------------------------------------------
 #set(AFB_TOKEN   ""      CACHE PATH "Default AFB_TOKEN")
 #set(AFB_REMPORT "1234" CACHE PATH "Default AFB_TOKEN")
+
+# This include is mandatory and MUST happens at the end
+# of this file, else you expose you to unexpected behavior
+# -----------------------------------------------------------
+include(${PROJECT_APP_TEMPLATES_DIR}/cmake/common.cmake)
