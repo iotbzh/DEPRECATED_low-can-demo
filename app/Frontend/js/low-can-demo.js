@@ -235,7 +235,7 @@ var msgcnt=0;
 var msgprv=0;
 var msgprvts=0;
 
-function gotAny(obj) { 
+function gotAny(obj) {
 	if (obj.event != "low-can/STOP") {
 		document.body.className = "started";
 	}
@@ -243,7 +243,23 @@ function gotAny(obj) {
 
 	wdgTem.innerHTML = temp;
 	gauges.iatemp.setValue(temp);
-//	updateClock(obj.data.timestamp);
+}
+
+function gotDiag(obj) { 
+	switch(obj.data.name) {
+		case "diagnostic_messages.vehicle.speed":
+			gotVehicleSpeed(obj);
+			break;
+		case "diagnostic_messages.mass.airflow":
+			gotFuelLevel(obj);
+			break;
+		case "diagnostic_messages.engine.speed":
+			gotEngineSpeed(obj);
+			break;
+		case "diagnostic_messages.engine.load":
+			gotTorque(obj);
+			break;
+	}
 }
 
 function updateMsgRate() {
@@ -292,21 +308,13 @@ function onClose() {
 
 function onSubscribed() {
 	document.body.className = "connected";
-	ws.onevent("low-can/diagnostic_messages.engine.speed", gotEngineSpeed);
-	ws.onevent("low-can/diagnostic_messages.mass.airflow", gotFuelLevel);
-	ws.onevent("low-can/diagnostic_messages.vehicle.speed", gotVehicleSpeed);
-	ws.onevent("low-can/diagnostic_messages.engine.load", gotTorque);
-	ws.onevent("low-can/diagnostic_messages.intake.air.temperature", gotTemp);
+	ws.onevent("low-can/diagnostic_messages", gotDiag);
 	ws.onevent("low-can",gotAny);
 }
 
 function onUnsubscribed() {
 	document.body.className = "disconnected";
-	ws.onevent("low-can/diagnostic_messages.engine.speed", gotEngineSpeed);
-	ws.onevent("low-can/diagnostic_messages.mass.airflow", gotFuelLevel);
-	ws.onevent("low-can/diagnostic_messages.vehicle.speed", gotVehicleSpeed);
-	ws.onevent("low-can/diagnostic_messages.engine.load", gotTorque);
-	ws.onevent("low-can/diagnostic_messages.intake.air.temperature", gotTemp);
+	ws.onevent("low-can/diagnostic_messages", gotDiag);
 	ws.onevent("low-can",gotAny);
 }
 
