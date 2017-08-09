@@ -7,17 +7,7 @@
 	<author>@PROJECT_AUTHOR@ &lt;@PROJECT_AUTHOR_MAIL@&gt;</author>
 	<license>@PROJECT_LICENSE@</license>
 	<feature name="urn:AGL:widget:required-api">
-		<param name="#target" value="main" />
 		<param name="low-can" value="auto" />
-	</feature>
-	<feature name="urn:AGL:widget:provided-unit">
-		<param name="#target" value="stat" />
-		<param name="description" value="CPU stat binding used in HTML5 UI" />
-		<param name="content.src" value="lib/stat.so" />
-		<param name="content.type" value="application/vnd.agl.service" />
-	</feature>
-	<feature name="urn:AGL:widget:provided-api">
-		<param name="#target" value="main" />
-		<param name="stat" value="ws" />
+		<param name="lib/afb-stat.so" value="local" />
 	</feature>
 </widget>
