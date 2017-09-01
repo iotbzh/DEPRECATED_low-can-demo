@@ -102,7 +102,7 @@ set(WIDGET_TYPE text/html)
 # This is the file that will be executed, loaded,
 # at launch time by the application framework.
 #
-set(WIDGET_ENTRY_POINT htdocs/index.html)
+set(WIDGET_ENTRY_POINT index.html)
 
 # Optional dependencies order
 # ---------------------------
