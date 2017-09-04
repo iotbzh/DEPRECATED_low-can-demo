@@ -155,15 +155,15 @@ static int emit(sd_event_source *src, int fd, uint32_t revents, void *userdata)
 
 static int start()
 {
-	int fdp, fdt, rc;
+	int fdp;
 	struct itimerspec ts;
 	struct sd_event_source *src;
 
 	fdp = open("/proc/stat", O_RDONLY|O_CLOEXEC);
 	if (fdp >= 0) {
-		rc = read_status(fdp, &newer);
+		int rc = read_status(fdp, &newer);
 		if (rc >= 0) {
-			fdt = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK|TFD_CLOEXEC);
+			int fdt = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK|TFD_CLOEXEC);
 			if (fdt >= 0) {
 				ts.it_interval.tv_sec = 1;
 				ts.it_value.tv_sec = 1;
