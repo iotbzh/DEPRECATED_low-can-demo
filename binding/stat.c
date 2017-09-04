@@ -131,7 +131,7 @@ static int emit(sd_event_source *src, int fd, uint32_t revents, void *userdata)
 	rc = read_status(fd_proc, &newer);
 	for(f = 0; f < (int)CPU_FIELD_COUNT ; f++)
 		diff.cpu[f] = newer.cpu[f] - older.cpu[f];
-	
+
 	u = 0;
 	s = 0;
 	i = 0;
@@ -150,7 +150,7 @@ static int emit(sd_event_source *src, int fd, uint32_t revents, void *userdata)
 	obj = json_object_new_int(p);
 	if (afb_event_push(event, obj) == 0)
 		stop();
-	return 0;
+	return rc;
 }
 
 static int start()
