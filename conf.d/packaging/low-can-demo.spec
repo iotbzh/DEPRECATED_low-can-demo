@@ -22,7 +22,7 @@ Version: 0.9
 Release: 1
 License: APL2.0
 Summary: HTML5 Low level CAN service UI for demo
-Url:     https://gerrit.automotivelinux.org/gerrit/apps/app-templates
+Url:     https://gerrit.automotivelinux.org/gerrit/apps/low-can-demo
 Source0: %{name}_%{version}.orig.tar.gz
 
 Prefix: /opt/low-can-demo

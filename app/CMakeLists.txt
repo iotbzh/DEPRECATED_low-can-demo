@@ -36,8 +36,3 @@ PROJECT_TARGET_ADD(low-can-demo)
 		LABELS "HTDOCS"
 		OUTPUT_NAME dist.prod)
 
-	# installation directory
-	INSTALL(DIRECTORY dist.prod/ DESTINATION ${BINDINGS_INSTALL_DIR})
-
-# Add subdir targets
-project_subdirs_add()

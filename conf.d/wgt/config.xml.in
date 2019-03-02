@@ -10,4 +10,12 @@
 		<param name="low-can" value="auto" />
 		<param name="lib/afb-stat.so" value="local" />
 	</feature>
+	<feature name="urn:AGL:widget:provided-unit">
+		<param name="#target" value="stat" />
+		<param name="description" value="CPU stat binding used in HTML5 UI" />
+		<param name="content.src" value="lib/afb-stat.so" />
+		<param name="content.type" value="application/vnd.agl.service" />
+	</feature>
+	<feature name="urn:AGL:widget:provided-api">
+		<param name="low-can-demo" value="ws" />
 </widget>
