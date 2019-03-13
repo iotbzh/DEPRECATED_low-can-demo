@@ -29,9 +29,9 @@ set(PROJECT_AUTHOR_MAIL "romain.forlot@iot.bzh")
 set(PROJECT_LICENSE "APL2.0")
 set(PROJECT_LANGUAGES,"C")
 
-# Where are stored default templates files from submodule or subtree app-templates in your project tree
+# Where are stored the default project configuration files 
 # relative to the root project directory
-set(PROJECT_APP_TEMPLATES_DIR "conf.d/app-templates")
+set(PROJECT_CMAKE_CONF_DIR "conf.d")
 
 # Where are stored your external libraries for your project. This is 3rd party library that you don't maintain
 # but used and must be built and linked.
@@ -102,7 +102,7 @@ set(WIDGET_TYPE text/html)
 # This is the file that will be executed, loaded,
 # at launch time by the application framework.
 #
-set(WIDGET_ENTRY_POINT index.html)
+set(WIDGET_ENTRY_POINT htdocs/index.html)
 
 # Optional dependencies order
 # ---------------------------
@@ -137,4 +137,4 @@ set(WIDGET_ENTRY_POINT index.html)
 # This include is mandatory and MUST happens at the end
 # of this file, else you expose you to unexpected behavior
 # -----------------------------------------------------------
-include(${PROJECT_APP_TEMPLATES_DIR}/cmake/common.cmake)
+include(CMakeAfbTemplates)
